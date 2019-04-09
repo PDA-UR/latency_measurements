@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
 
@@ -46,8 +47,11 @@ class ProcessingPipeline:
                 break  # No need to continue the loop
 
         # The csv file is now read in and relevant parts are extracted. Now the data needs to be processed further
+        latencies = self.parse_measurements(measurement_rows)
+
         self.parse_comments(comment_lines)
-        self.generate_plot(filename, self.parse_measurements(measurement_rows))
+        self.get_stats_about_data(latencies)
+        self.generate_plot(filename, latencies)
 
     # Parse the bare rows from the .csv file and extract only the relevant data
     def parse_measurements(self, measurement_rows):
@@ -57,6 +61,11 @@ class ProcessingPipeline:
             row_values = measurement_rows[i].split(Constants.CSV_DELIMITER)
             latencies.append(float(row_values[1]) / 1000)  # Divide by 1000 to get ms
 
+        for i in range(len(latencies)):
+            if latencies[i] > Constants.PLOT_X_MAX:
+                print("WARNING: One or more measured latencies exceed the defined limit of the plots x-axis and will not be displayed!")
+                break
+
         return latencies
 
     # Interpret the comment lines of the .csv file. They contain relevant metadata about the measurement
@@ -64,6 +73,15 @@ class ProcessingPipeline:
         print("Comments:")
         for comment_line in comment_lines:
             print(comment_line.split(';')[0].replace('#', '') + " " + comment_line.split(';')[1])
+
+    def get_stats_about_data(self, latencies):
+        mean = np.mean(latencies)
+        median = np.median(latencies)
+        minimum = min(latencies)
+        maximum = max(latencies)
+        standard_deviation = np.std(latencies)
+
+        print((mean, median, minimum, maximum, standard_deviation))
 
     # Get a name for the plot that will be saved as an image at the end
     def get_image_filename(self, filename):
@@ -77,7 +95,7 @@ class ProcessingPipeline:
         # ci="sd", zorder=1, errwidth=0.5, capsize=.2, ax =axes)
         # ax = sns.swarmplot((values["latency"]), values["polling"], hue=None, palette="colorblind", size=1, dodge=True,
         # marker="H",orient="h", alpha=1, zorder=0)
-        
+
         ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", dodge=True, marker="H", orient="h", alpha=1,
                            zorder=0)
 
