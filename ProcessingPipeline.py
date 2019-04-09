@@ -6,10 +6,11 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 
+# All Constants are placed in their own class to find them more easily
 class Constants:
     CSV_DELIMITER = ';'
-    PLOT_X_MIN = 0
-    PLOT_X_MAX = 50
+    PLOT_X_MIN = 0  # Minimum x value of the plot
+    PLOT_X_MAX = 50  # Maximum x value of the plot
     PLOT_WIDTH = 16
     PLOT_HEIGHT = 4
     PLOT_OUTPUT_DPI = 600
@@ -19,13 +20,14 @@ class ProcessingPipeline:
 
     def __init__(self):
         try:
-            filename = sys.argv[1]
+            filename = sys.argv[1]  # The filename needs to be passed over as an argument when starting the script
         except IndexError:
-            sys.exit("No .csv file handed over. The name of the .csv file needs to be passed as an argument")
+            sys.exit("No .csv file handed over. The name of the .csv file needs to be passed as an argument.")
 
-        print(filename)
+        print(filename + " will be processed.")
         self.read_csv_data(filename)
 
+    # Reads in a csv file and hands the data over at the end
     def read_csv_data(self, filename):
         try:
             current_file = open(filename, 'r').readlines()  # Open the csv File
@@ -43,11 +45,11 @@ class ProcessingPipeline:
                     current_file)]  # Take all rows of the file starting by the first line after the header
                 break  # No need to continue the loop
 
-        latencies = self.parse_measurements(measurement_rows)
+        # The csv file is now read in and relevant parts are extracted. Now the data needs to be processed further
         self.parse_comments(comment_lines)
+        self.generate_plot(filename, self.parse_measurements(measurement_rows))
 
-        self.generate_plot(filename, latencies)
-
+    # Parse the bare rows from the .csv file and extract only the relevant data
     def parse_measurements(self, measurement_rows):
         latencies = []
 
@@ -57,6 +59,7 @@ class ProcessingPipeline:
 
         return latencies
 
+    # Interpret the comment lines of the .csv file. They contain relevant metadata about the measurement
     def parse_comments(self, comment_lines):
         print("Comments:")
         for comment_line in comment_lines:
@@ -66,11 +69,15 @@ class ProcessingPipeline:
     def get_image_filename(self, filename):
         return filename.replace('.csv', '.png')
 
+    # Generate a plot from the extracted latenxies
     def generate_plot(self, filename, latencies):
         plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
 
-        # ax = sns.pointplot((values["latency"]), values["polling"], join=False, palette="dark", markers="D", scale=.75, ci="sd", zorder=1, errwidth=0.5, capsize=.2, ax =axes)
-        # ax = sns.swarmplot((values["latency"]), values["polling"], hue=None, palette="colorblind", size=1, dodge=True, marker="H",orient="h", alpha=1, zorder=0)
+        # ax = sns.pointplot((values["latency"]), values["polling"], join=False, palette="dark", markers="D", scale=.75,
+        # ci="sd", zorder=1, errwidth=0.5, capsize=.2, ax =axes)
+        # ax = sns.swarmplot((values["latency"]), values["polling"], hue=None, palette="colorblind", size=1, dodge=True,
+        # marker="H",orient="h", alpha=1, zorder=0)
+        
         ax = sns.swarmplot(x=latencies, hue=None, palette="colorblind", dodge=True, marker="H", orient="h", alpha=1,
                            zorder=0)
 
