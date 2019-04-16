@@ -5,13 +5,14 @@ import sys
 import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
+import mysql.connector
 
 
 # All Constants are placed in their own class to find them more easily
 class Constants:
     CSV_DELIMITER = ';'
     PLOT_X_MIN = 0  # Minimum x value of the plot
-    PLOT_X_MAX = 50  # Maximum x value of the plot
+    PLOT_X_MAX = 100  # Maximum x value of the plot
     PLOT_WIDTH = 16
     PLOT_HEIGHT = 4
     PLOT_OUTPUT_DPI = 600
@@ -62,7 +63,7 @@ class ProcessingPipeline:
             latencies.append(float(row_values[1]) / 1000)  # Divide by 1000 to get ms
 
         for i in range(len(latencies)):
-            if latencies[i] > Constants.PLOT_X_MAX:
+            if latencies[i] > Constants.PLOT_X_MAX:  # Check if values will get clipped
                 print("WARNING: One or more measured latencies exceed the defined limit of the plots x-axis and will not be displayed!")
                 break
 
@@ -81,13 +82,13 @@ class ProcessingPipeline:
         maximum = max(latencies)
         standard_deviation = np.std(latencies)
 
-        print((mean, median, minimum, maximum, standard_deviation))
+        print("Mean: ", mean, "Median: ", median, "Minimum: ", minimum, "Maximum", maximum, "Standard Deviation: ", standard_deviation)
 
     # Get a name for the plot that will be saved as an image at the end
     def get_image_filename(self, filename):
         return filename.replace('.csv', '.png')
 
-    # Generate a plot from the extracted latenxies
+    # Generate a plot from the extracted latencies
     def generate_plot(self, filename, latencies):
         plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
 
@@ -107,6 +108,23 @@ class ProcessingPipeline:
 
         plt.savefig(self.get_image_filename(filename), dpi=Constants.PLOT_OUTPUT_DPI)
         print("Plot created successfully")
+
+    def write_to_database(self):
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            passwd="",
+            database="lagbox_db"
+        )
+
+        mycursor = mydb.cursor()
+        #mycursor.execute("INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, `authors`, `vendorID`, `productID`, `date`, `bIntervall`, `deviceType`, `mean`, `median`, `min`, `max`, `standardDeviation`, `deviceImage`, `plotImage`) "
+        #                 "VALUES ('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '')")
+
+        #myresult = mycursor.fetchall()
+
+        #for x in myresult:
+        #    print(x)
 
 
 def main():
