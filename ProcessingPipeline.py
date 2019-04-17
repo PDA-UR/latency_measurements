@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 import mysql.connector
 from datetime import datetime
+from ftplib import FTP
 
 
 # All Constants are placed in their own class to find them more easily
@@ -23,17 +24,22 @@ class Constants:
     DATABASE_PASSWORD = ''
     DATABASE_NAME = 'lagbox_db'
 
+    FTP_SERVER_URL = 'ni29236-1.web16.nitrado.hosting'
+    FTP_SERVER_PATH = '/images'
+    FTP_SERVER_USER = 'ni29236_1'
+    FTP_SERVER_PASSWORD = 'uploadtests@MIUR'
+
 
 class Result:
 
     def __init__(self):
-        self.name = 'E'
+        self.name = 'Logitech M50'
         self.minDelay = 100
         self.maxDelay = 10000
         self.iterations = 1000
-        self.authors = 'A'
-        self.vendorID = 'A'
-        self.productID = 'A'
+        self.authors = 'Vitus'
+        self.vendorID = '1234-5678-9012'
+        self.productID = 'abcd-efgh-jklm'
         self.date = datetime.now().strftime('%Y-%m-%d')
         self.bIntervall = 1000
         self.deviceType = 'Mouse'
@@ -42,8 +48,8 @@ class Result:
         self.min = 0.0
         self.max = 0.0
         self.standardDeviation = 0.0
-        self.deviceImage = 'A'
-        self.plotImage = 'A'
+        self.deviceImage = 'https://assets.logitech.com/assets/65019/mouton-boat-m90-refresh-gallery-image.png'  # TODO: ADD PLACEHOLDER LINK HERE IF NO IMAGE IS AVAILABLE
+        self.plotImage = ''
 
 
 class ProcessingPipeline:
@@ -156,6 +162,8 @@ class ProcessingPipeline:
         plt.savefig(self.get_image_filename(filename), dpi=Constants.PLOT_OUTPUT_DPI)
         print("Plot created successfully")
 
+        self.image_uploader(self.get_image_filename(filename))
+
         self.write_to_database()
 
     def write_to_database(self):
@@ -186,6 +194,25 @@ class ProcessingPipeline:
         database.commit()
 
         print("Values inserted into database", Constants.DATABASE_NAME)
+
+    def image_uploader(self, filename):
+
+        print("Trying to upload a file")
+
+        ftp = FTP(Constants.FTP_SERVER_URL)
+        ftp.login(Constants.FTP_SERVER_USER, Constants.FTP_SERVER_PASSWORD)
+        ftp.cwd(Constants.FTP_SERVER_PATH)
+
+        print("FTP connection established")
+
+        with open(filename, 'rb') as file:
+            ftp.storbinary('STOR ' + filename, file)
+            file.close()
+        ftp.quit()
+
+        print("Image uploaded successfully!")
+
+        self.result.plotImage = 'http://' + Constants.FTP_SERVER_URL + Constants.FTP_SERVER_PATH + '/' + filename
 
 
 def main():
