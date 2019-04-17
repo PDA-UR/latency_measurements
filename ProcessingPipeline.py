@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
 import mysql.connector
+from datetime import datetime
 
 
 # All Constants are placed in their own class to find them more easily
@@ -26,23 +27,23 @@ class Constants:
 class Result:
 
     def __init__(self):
-        self.name = ''
-        self.minDelay = -1
-        self.maxDelay = -1
-        self.iterations = -1
-        self.authors = ''
-        self.vendorID = ''
-        self.productID = ''
-        self.date = ''  # TODO: Check what date format to use for a MySQL Database
-        self.bIntervall = -1
-        self.deviceType = -1
-        self.mean = -1.0
-        self.median = -1.0
-        self.min = -1.0
-        self.max = -1.0
-        self.standardDeviation = -1.0
-        self.deviceImage = ''
-        self.plotImage = ''
+        self.name = 'D'
+        self.minDelay = 100
+        self.maxDelay = 10000
+        self.iterations = 1000
+        self.authors = 'A'
+        self.vendorID = 'A'
+        self.productID = 'A'
+        self.date = datetime.now().strftime('%Y-%m-%d')  # TODO: Check what date format to use for a MySQL Database
+        self.bIntervall = 1000
+        self.deviceType = 'Mouse'
+        self.mean = 0.0
+        self.median = 0.0
+        self.min = 0.0
+        self.max = 0.0
+        self.standardDeviation = 0.0
+        self.deviceImage = 'A'
+        self.plotImage = 'A'
 
 
 class ProcessingPipeline:
@@ -118,7 +119,6 @@ class ProcessingPipeline:
         self.result.standardDeviation = standard_deviation
 
         print("Mean: ", mean, "Median: ", median, "Minimum: ", minimum, "Maximum", maximum, "Standard Deviation: ", standard_deviation)
-        print(self.result.mean)
 
     # Get a name for the plot that will be saved as an image at the end
     def get_image_filename(self, filename):
@@ -158,18 +158,21 @@ class ProcessingPipeline:
             database=Constants.DATABASE_NAME
         )
 
-        database.cursor().execute("INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, "
-                                  "`authors`, `vendorID`, `productID`, `date`, `bIntervall`, `deviceType`, `mean`, "
-                                  "`median`, `min`, `max`, `standardDeviation`, `deviceImage`, `plotImage`) VALUES (" +
-                                  self.result.name + ',' + str(self.result.minDelay) + ',' +
-                                  str(self.result.maxDelay) + ',' + str(self.result.iterations) + ',' +
-                                  self.result.authors + ',' + self.result.vendorID + ',' +
-                                  self.result.productID + ',' + self.result.date + ',' +
-                                  str(self.result.bIntervall) + ',' + str(self.result.deviceType) + ',' +
-                                  str(self.result.mean) + ',' + str(self.result.median) + ',' +
-                                  str(self.result.min) + ',' + str(self.result.max) + ',' +
-                                  str(self.result.standardDeviation) + ',' + self.result.deviceImage + ',' +
-                                  self.result.plotImage + ")")
+        sql = "INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, `authors`, `vendorID`, " \
+              "`productID`, `date`, `bIntervall`, `deviceType`, `mean`, `median`, `min`, `max`, `standardDeviation`, " \
+              "`deviceImage`, `plotImage`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+        values = (self.result.name, str(self.result.minDelay), str(self.result.maxDelay),  str(self.result.iterations),
+                  self.result.authors, self.result.vendorID, self.result.productID, self.result.date,
+                  str(self.result.bIntervall), self.result.deviceType, str(self.result.mean), str(self.result.median),
+                  str(self.result.min), str(self.result.max), str(self.result.standardDeviation),
+                  self.result.deviceImage, self.result.plotImage)
+
+        database.cursor().execute(sql, values)
+        database.commit()
+
+        print("Values inserted into database", Constants.DATABASE_NAME)
+
 
 def main():
     processingPipeline = ProcessingPipeline()
