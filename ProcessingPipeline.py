@@ -27,14 +27,14 @@ class Constants:
 class Result:
 
     def __init__(self):
-        self.name = 'D'
+        self.name = 'E'
         self.minDelay = 100
         self.maxDelay = 10000
         self.iterations = 1000
         self.authors = 'A'
         self.vendorID = 'A'
         self.productID = 'A'
-        self.date = datetime.now().strftime('%Y-%m-%d')  # TODO: Check what date format to use for a MySQL Database
+        self.date = datetime.now().strftime('%Y-%m-%d')
         self.bIntervall = 1000
         self.deviceType = 'Mouse'
         self.mean = 0.0
@@ -162,12 +162,15 @@ class ProcessingPipeline:
 
         print('Connecting to Database', Constants.DATABASE_NAME)
 
-        database = mysql.connector.connect(
-            host=Constants.DATABASE_HOST,
-            user=Constants.DATABASE_USER,
-            passwd=Constants.DATABASE_PASSWORD,
-            database=Constants.DATABASE_NAME
-        )
+        try:
+            database = mysql.connector.connect(
+                host=Constants.DATABASE_HOST,
+                user=Constants.DATABASE_USER,
+                passwd=Constants.DATABASE_PASSWORD,
+                database=Constants.DATABASE_NAME
+            )
+        except mysql.connector.errors.InterfaceError:
+            sys.exit("No connection to database '" + Constants.DATABASE_NAME + "' possible. Try again!")
 
         sql = "INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, `authors`, `vendorID`, " \
               "`productID`, `date`, `bIntervall`, `deviceType`, `mean`, `median`, `min`, `max`, `standardDeviation`, " \
