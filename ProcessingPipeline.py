@@ -26,14 +26,14 @@ class Constants:
 class Result:
 
     def __init__(self):
-        self.name = ""
+        self.name = ''
         self.minDelay = -1
         self.maxDelay = -1
         self.iterations = -1
-        self.authors = ""
-        self.vendorID = ""
-        self.productID = ""
-        self.date = ""  # TODO: Check what date format to use for a MySQL Database
+        self.authors = ''
+        self.vendorID = ''
+        self.productID = ''
+        self.date = ''  # TODO: Check what date format to use for a MySQL Database
         self.bIntervall = -1
         self.deviceType = -1
         self.mean = -1.0
@@ -41,8 +41,8 @@ class Result:
         self.min = -1.0
         self.max = -1.0
         self.standardDeviation = -1.0
-        self.deviceImage = ""
-        self.plotImage = ""
+        self.deviceImage = ''
+        self.plotImage = ''
 
 
 class ProcessingPipeline:
@@ -158,11 +158,18 @@ class ProcessingPipeline:
             database=Constants.DATABASE_NAME
         )
 
-        #database.cursor().execute("INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, `authors`, `vendorID`, `productID`, `date`, `bIntervall`, `deviceType`, `mean`, `median`, `min`, `max`, `standardDeviation`, `deviceImage`, `plotImage`) "
-        #                 "VALUES ('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '')")
-
-
-
+        database.cursor().execute("INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, "
+                                  "`authors`, `vendorID`, `productID`, `date`, `bIntervall`, `deviceType`, `mean`, "
+                                  "`median`, `min`, `max`, `standardDeviation`, `deviceImage`, `plotImage`) VALUES (" +
+                                  self.result.name + ',' + str(self.result.minDelay) + ',' +
+                                  str(self.result.maxDelay) + ',' + str(self.result.iterations) + ',' +
+                                  self.result.authors + ',' + self.result.vendorID + ',' +
+                                  self.result.productID + ',' + self.result.date + ',' +
+                                  str(self.result.bIntervall) + ',' + str(self.result.deviceType) + ',' +
+                                  str(self.result.mean) + ',' + str(self.result.median) + ',' +
+                                  str(self.result.min) + ',' + str(self.result.max) + ',' +
+                                  str(self.result.standardDeviation) + ',' + self.result.deviceImage + ',' +
+                                  self.result.plotImage + ")")
 
 def main():
     processingPipeline = ProcessingPipeline()
