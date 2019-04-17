@@ -17,8 +17,37 @@ class Constants:
     PLOT_HEIGHT = 4
     PLOT_OUTPUT_DPI = 600
 
+    DATABASE_HOST = 'localhost'
+    DATABASE_USER = 'root'
+    DATABASE_PASSWORD = ''
+    DATABASE_NAME = 'lagbox_db'
+
+
+class Result:
+
+    def __init__(self):
+        self.name = ""
+        self.minDelay = -1
+        self.maxDelay = -1
+        self.iterations = -1
+        self.authors = ""
+        self.vendorID = ""
+        self.productID = ""
+        self.date = ""  # TODO: Check what date format to use for a MySQL Database
+        self.bIntervall = -1
+        self.deviceType = -1
+        self.mean = -1.0
+        self.median = -1.0
+        self.min = -1.0
+        self.max = -1.0
+        self.standardDeviation = -1.0
+        self.deviceImage = ""
+        self.plotImage = ""
+
 
 class ProcessingPipeline:
+
+    result = Result()
 
     def __init__(self):
         try:
@@ -39,12 +68,12 @@ class ProcessingPipeline:
         comment_lines = []  # All lines containing a comment (==> Metadata about the measurement)
         measurement_rows = []  # All lines containing actual measurement data
 
+        # TODO:  Check loop performance
         for i in range(len(current_file)):
             if current_file[i][0] is '#':  # If row is a comment
                 comment_lines.append(current_file[i])
             elif current_file[i] == 'counter;latency;delayTime\n':  # If row is header of measurements
-                measurement_rows = current_file[i + 1:len(
-                    current_file)]  # Take all rows of the file starting by the first line after the header
+                measurement_rows = current_file[i + 1:len(current_file)]  # Take all rows of the file starting by the first line after the header
                 break  # No need to continue the loop
 
         # The csv file is now read in and relevant parts are extracted. Now the data needs to be processed further
@@ -82,7 +111,14 @@ class ProcessingPipeline:
         maximum = max(latencies)
         standard_deviation = np.std(latencies)
 
+        self.result.mean = mean
+        self.result.median = median
+        self.result.min = minimum
+        self.result.max = maximum
+        self.result.standardDeviation = standard_deviation
+
         print("Mean: ", mean, "Median: ", median, "Minimum: ", minimum, "Maximum", maximum, "Standard Deviation: ", standard_deviation)
+        print(self.result.mean)
 
     # Get a name for the plot that will be saved as an image at the end
     def get_image_filename(self, filename):
@@ -109,22 +145,23 @@ class ProcessingPipeline:
         plt.savefig(self.get_image_filename(filename), dpi=Constants.PLOT_OUTPUT_DPI)
         print("Plot created successfully")
 
+        self.write_to_database()
+
     def write_to_database(self):
-        mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            passwd="",
-            database="lagbox_db"
+
+        print('Connecting to Database', Constants.DATABASE_NAME)
+
+        database = mysql.connector.connect(
+            host=Constants.DATABASE_HOST,
+            user=Constants.DATABASE_USER,
+            passwd=Constants.DATABASE_PASSWORD,
+            database=Constants.DATABASE_NAME
         )
 
-        mycursor = mydb.cursor()
-        #mycursor.execute("INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, `authors`, `vendorID`, `productID`, `date`, `bIntervall`, `deviceType`, `mean`, `median`, `min`, `max`, `standardDeviation`, `deviceImage`, `plotImage`) "
+        #database.cursor().execute("INSERT INTO `measurements` (`name`, `minDelay`, `maxDelay`, `iterations`, `authors`, `vendorID`, `productID`, `date`, `bIntervall`, `deviceType`, `mean`, `median`, `min`, `max`, `standardDeviation`, `deviceImage`, `plotImage`) "
         #                 "VALUES ('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '')")
 
-        #myresult = mycursor.fetchall()
 
-        #for x in myresult:
-        #    print(x)
 
 
 def main():
