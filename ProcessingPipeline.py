@@ -69,7 +69,6 @@ class ProcessingPipeline:
         comment_lines = []  # All lines containing a comment (==> Metadata about the measurement)
         measurement_rows = []  # All lines containing actual measurement data
 
-        # TODO:  Check loop performance
         for i in range(len(current_file)):
             if current_file[i][0] is '#':  # If row is a comment
                 comment_lines.append(current_file[i])
@@ -103,7 +102,19 @@ class ProcessingPipeline:
     def parse_comments(self, comment_lines):
         print("Comments:")
         for comment_line in comment_lines:
-            print(comment_line.split(';')[0].replace('#', '') + " " + comment_line.split(';')[1])
+            key = comment_line.split(';')[0].replace('#', '')
+            value = comment_line.split(';')[1]
+            print(key, value)
+            if key == "Device":
+                self.result.name = value
+            elif key == "minDelay":
+                self.result.minDelay = value
+            elif key == "maxDelay":
+                self.result.maxDelay = value
+            elif key == "iterations":
+                self.result.iterations = value
+            elif key == "":  # TODO: ADD ALL OTHER METADATA
+                pass
 
     def get_stats_about_data(self, latencies):
         mean = np.mean(latencies)
