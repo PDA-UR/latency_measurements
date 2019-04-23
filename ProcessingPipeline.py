@@ -125,12 +125,15 @@ class ProcessingPipeline:
             elif key == "":  # TODO: ADD ALL OTHER METADATA
                 pass
 
+    # Calculate mean, median, standard deviation, etc.
     def get_stats_about_data(self, latencies):
         mean = np.mean(latencies)
         median = np.median(latencies)
         minimum = min(latencies)
         maximum = max(latencies)
         standard_deviation = np.std(latencies)
+
+        # TODO: Calculate additional stats (maybe ttest, ...)
 
         self.result.mean = mean
         self.result.median = median
