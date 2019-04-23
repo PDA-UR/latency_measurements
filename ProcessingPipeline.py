@@ -80,7 +80,8 @@ class ProcessingPipeline:
             if current_file[i][0] is '#':  # If row is a comment
                 comment_lines.append(current_file[i])
             elif current_file[i] == 'counter;latency;delayTime\n':  # If row is header of measurements
-                measurement_rows = current_file[i + 1:len(current_file)]  # Take all rows of the file starting by the first line after the header
+                # Take all rows of the file starting by the first line after the header
+                measurement_rows = current_file[i + 1:len(current_file)]
                 break  # No need to continue the loop
 
         # The csv file is now read in and relevant parts are extracted. Now the data needs to be processed further
@@ -100,7 +101,8 @@ class ProcessingPipeline:
 
         for i in range(len(latencies)):
             if latencies[i] > Constants.PLOT_X_MAX:  # Check if values will get clipped
-                print("WARNING: One or more measured latencies exceed the defined limit of the plots x-axis and will not be displayed!")
+                print("WARNING: One or more measured latencies exceed the defined limit of the plots x-axis and will "
+                      "not be displayed!")
                 break
 
         return latencies
@@ -136,7 +138,8 @@ class ProcessingPipeline:
         self.result.max = maximum
         self.result.standardDeviation = standard_deviation
 
-        print("Mean: ", mean, "Median: ", median, "Minimum: ", minimum, "Maximum", maximum, "Standard Deviation: ", standard_deviation)
+        print("Mean: ", mean, "Median: ", median, "Minimum: ", minimum, "Maximum", maximum, "Standard Deviation: ",
+              standard_deviation)
 
     # Get a name for the plot that will be saved as an image at the end
     def get_image_filename(self, filename):
@@ -167,6 +170,7 @@ class ProcessingPipeline:
         self.image_uploader(self.get_image_filename(filename))
         self.write_to_database()
 
+    # Insert new entries into database
     def write_to_database(self):
 
         print('Connecting to Database', Constants.DATABASE_NAME)
@@ -196,6 +200,7 @@ class ProcessingPipeline:
 
         print("Values inserted into database", Constants.DATABASE_NAME)
 
+    # Upload the plot image to a webserver
     def image_uploader(self, filename):
 
         print("Trying to upload a file")
