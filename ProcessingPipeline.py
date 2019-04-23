@@ -18,6 +18,7 @@ class Constants:
     PLOT_WIDTH = 16
     PLOT_HEIGHT = 4
     PLOT_OUTPUT_DPI = 600
+    PLOT_FONTSIZE = 22
 
     DATABASE_HOST = 'localhost'
     DATABASE_USER = 'root'
@@ -143,6 +144,7 @@ class ProcessingPipeline:
 
     # Generate a plot from the extracted latencies
     def generate_plot(self, filename, latencies):
+        plt.rcParams.update({'font.size': Constants.PLOT_FONTSIZE})
         plt.figure(figsize=[Constants.PLOT_WIDTH, Constants.PLOT_HEIGHT])
 
         # ax = sns.pointplot((values["latency"]), values["polling"], join=False, palette="dark", markers="D", scale=.75,
@@ -159,11 +161,10 @@ class ProcessingPipeline:
 
         axes = plt.gca()
 
-        plt.savefig(self.get_image_filename(filename), dpi=Constants.PLOT_OUTPUT_DPI)
+        plt.savefig(self.get_image_filename(filename), dpi=Constants.PLOT_OUTPUT_DPI, bbox_inches="tight")
         print("Plot created successfully")
 
         self.image_uploader(self.get_image_filename(filename))
-
         self.write_to_database()
 
     def write_to_database(self):
