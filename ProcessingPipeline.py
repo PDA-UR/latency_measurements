@@ -17,8 +17,8 @@ class Constants:
     PLOT_X_MAX = 100  # Maximum x value of the plot
     PLOT_WIDTH = 16
     PLOT_HEIGHT = 4
-    PLOT_OUTPUT_DPI = 600
-    PLOT_FONTSIZE = 22
+    PLOT_OUTPUT_DPI = 300
+    PLOT_FONTSIZE = 18
 
     DATABASE_HOST = 'localhost'
     DATABASE_USER = 'root'
@@ -175,6 +175,8 @@ class ProcessingPipeline:
 
     # Insert new entries into database
     def write_to_database(self):
+
+        # TODO: UUID für jede Messung übergeben
 
         print('Connecting to Database', Constants.DATABASE_NAME)
 
